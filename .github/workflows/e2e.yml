@@ -1,0 +1,18 @@
+name: E2E Docker
+on:
+  workflow_run:
+    workflows: ["Docker base image"]
+    branches: [ master ]
+    types: [ completed ]
+  push:
+    branches: [ master ]
+    paths:
+      - 'README2.md'
+jobs:
+  build:
+    name: Build Image
+    runs-on: ubuntu-20.04
+    if: ${{ github.event.workflow_run == null || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
