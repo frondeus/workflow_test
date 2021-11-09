@@ -24,9 +24,14 @@ jobs:
         run: |
           echo "::set-output name=files::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep README.md)"
 
+      - name: Debug variables
+        run: |
+          echo "Files: ${{ steps.getfile.outputs.files }}"
+          echo "Workflow run: ${{ github.event.workflow_run }}"
+
       - name: Cancel workflow if README.md changed
         uses: andymckay/cancel-action@0.2
-        if: ${{ steps.getfile.outputs.files }} != "" && github.event.workflow_run == null
+        if: github.event.workflow_run == null && ${{ steps.getfile.outputs.files }} != ""
 
       - name: Build me!
         run: |
