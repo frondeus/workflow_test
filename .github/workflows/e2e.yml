@@ -33,4 +33,4 @@ jobs:
       - name: Build me!
         run: |
           echo "Docker build"
-          sleep 6000
+          sleep 600
