@@ -30,10 +30,10 @@ jobs:
           echo "Workflow run: ${{ github.event.workflow_run }}"
 
       - name: Cancel workflow if README.md changed
-        if: ${{ github.event.workflow_run == null && steps.getfile.outputs.files != "" }}
+        if: ${{ github.event.workflow_run == null && steps.getfile.outputs.files == "README.md" }}
         uses: andymckay/cancel-action@0.2
 
       - name: Build me!
         run: |
           echo "Docker build"
-          sleep 60
+          sleep 6
