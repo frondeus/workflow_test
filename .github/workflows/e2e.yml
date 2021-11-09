@@ -25,10 +25,10 @@ jobs:
           echo "::set-output name=files::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep README.md)"
 
       - name: Cancel workflow if README.md changed
-        uses: styfle/cancel-workflow-action@0.9.1
+        uses: andymckay/cancel-action@0.2
         if: ${{ steps.getfile.outputs.files }} != "" && github.event.workflow_run == null
-        with:
-          access_token: ${{ github.token }}
+        # with:
+        #   access_token: ${{ github.token }}
 
       - name: Build me!
         run: |
