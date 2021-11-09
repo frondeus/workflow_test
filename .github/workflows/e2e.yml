@@ -30,8 +30,8 @@ jobs:
           echo "Workflow run: ${{ github.event.workflow_run }}"
 
       - name: Cancel workflow if README.md changed
+        if: ${{ github.event.workflow_run == null && steps.getfile.outputs.files != "" }}
         uses: andymckay/cancel-action@0.2
-        if: github.event.workflow_run == null && ${{ steps.getfile.outputs.files }} != ""
 
       - name: Build me!
         run: |
