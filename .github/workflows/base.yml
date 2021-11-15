@@ -3,6 +3,7 @@ on:
   push:
     branches: [ master ]
     paths:
+      - '.github/workflows/base.yml'
       - 'README.md'
 jobs:
   build:

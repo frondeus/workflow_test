@@ -7,6 +7,7 @@ on:
   push:
     branches: [ master ]
     paths:
+      - '.github/workflows/e2e.yml'
       - 'README2.md'
 jobs:
   build:
@@ -22,7 +23,7 @@ jobs:
       - name: Check if README.md has been changed as well
         id: getfile
         run: |
-          echo "::set-output name=files::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep README.md)"
+          echo "::set-output name=files::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | egrep 'README.md|')"
 
       - name: Debug variables
         run: |
