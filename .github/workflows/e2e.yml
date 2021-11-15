@@ -7,8 +7,8 @@ on:
   push:
     branches: [ master ]
     paths:
-      - '.github/workflows/e2e.yml'
       - 'README2.md'
+  workflow_dispatch:
 jobs:
   build:
     name: Build Image
