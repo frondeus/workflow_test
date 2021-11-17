@@ -69,3 +69,4 @@ jobs:
           token: ${{ steps.app_token.outputs.app_token }}
           check_id: ${{ steps.check.outputs.check_id }}
           conclusion: ${{ job.status }}
+          details_url: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}
