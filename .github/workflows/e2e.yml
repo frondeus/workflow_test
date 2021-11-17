@@ -13,15 +13,29 @@ jobs:
     steps:
       - if: contains(github.event.comment.body, '/e2e')
         name: Check comment sha
-        id: comment-sha
-        run: |
-          echo "Head: ${{ github.event.issue.pull_request.head_sha }}"
-          echo "Sha: ${{ env.GITHUB_SHA }}"
+        id: sha
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            github.reactions.createForIssueComment({
+              owner,
+              repo,
+              comment_id: context.payload.comment.id,
+              content: "+1"
+            });
+            const pr = await github.pulls.get({
+              owner,
+              repo,
+              pull_number: number
+            });
+            return pr.data.head.sha
 
       - if: contains(github.event.comment.body, '/e2e')
         uses: LouisBrunner/checks-action@v1.1.1
         id: check
         with:
+          sha: ${{ steps.sha.outputs.result }}
           token: ${{ secrets.GITHUB_TOKEN }}
           name: E2E tests
           status: in_progress
