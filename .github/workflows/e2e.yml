@@ -17,6 +17,7 @@ jobs:
         uses: actions/github-script@v4
         with:
           result-encoding: string
+          github-token: ${{ secrets.FRONDEUS_GH_TOKEN }}
           script: |
             const { owner, repo, number } = context.issue;
             github.reactions.createForIssueComment({
