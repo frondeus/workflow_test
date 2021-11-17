@@ -11,13 +11,21 @@ jobs:
     runs-on: ubuntu-20.04
     if: ${{ github.event.push != null || (github.event.issue.pull_request && contains(github.event.comment.body, '/e2e')) }}
     steps:
+      - if: contains(github.event.commet.body, '/e2e')
+        name: Get App token
+        id: app_token
+        uses: machine-learning-apps/actions-app-token@master
+        with:
+          APP_PEM: ${{ secrets.FRONDEUS_GH_PEM }}
+          APP_ID: ${{ secrets.FRONDEUS_GH_ID }}
+
       - if: contains(github.event.comment.body, '/e2e')
         name: Check comment sha
         id: sha
         uses: actions/github-script@v4
         with:
           result-encoding: string
-          github-token: ${{ secrets.FRONDEUS_GH_TOKEN }}
+          github-token: ${{ steps.app_token.outputs.app_token }}
           script: |
             const { owner, repo, number } = context.issue;
             github.reactions.createForIssueComment({
@@ -38,7 +46,7 @@ jobs:
         id: check
         with:
           sha: ${{ steps.sha.outputs.result }}
-          token: ${{ secrets.FRONDEUS_GH_TOKEN }}
+          token: ${{ steps.app_token.outputs.app_token }}
           name: E2E tests
           details_url: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}
           status: in_progress
@@ -58,6 +66,6 @@ jobs:
       - if: contains(github.event.comment.body, '/e2e') && always()
         uses: LouisBrunner/checks-action@v1.1.1
         with:
-          token: ${{ secrets.FRONDEUS_GH_TOKEN }}
+          token: ${{ steps.app_token.outputs.app_token }}
           check_id: ${{ steps.check.outputs.check_id }}
           conclusion: ${{ job.status }}
