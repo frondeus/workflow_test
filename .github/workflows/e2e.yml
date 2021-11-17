@@ -59,5 +59,5 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           check_id: ${{ steps.check.outputs.check_id }}
           conclusion: ${{ job.status }}
-          # output: |
-            # {"summary":${{ steps.test.outputs.summary }}}
+          output: |
+            {"summary":${{ steps.test.outputs.summary }}}
