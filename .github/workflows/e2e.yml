@@ -2,16 +2,15 @@ name: E2E Tests
 on:
   pull_request:
     branches: [ master ]
-    types: [ labeled ]
   push:
     branches: [ master ]
 jobs:
   build:
     name: Run tests
     runs-on: ubuntu-20.04
-    if: ${{ github.event.push != null || github.event.label.name == "e2e"}}
+    if: ${{ github.event.push != null || contains(github.event.pull_request.labels.*.name, 'e2e') }}
     steps:
-      - if: ${{ github.event.label.name=="e2e" }}
+      - if: ${{ contains(github.event.pull_request.labels.*.name, 'e2e') }}
         name: Get App token
         id: app_token
         uses: machine-learning-apps/actions-app-token@master
@@ -19,7 +18,7 @@ jobs:
           APP_PEM: ${{ secrets.FRONDEUS_GH_PEM }}
           APP_ID: ${{ secrets.FRONDEUS_GH_ID }}
 
-      - if: ${{ github.event.label.name=="e2e" }}
+      - if: ${{ contains(github.event.pull_request.labels.*.name, 'e2e') }}
         name: Check comment sha
         id: sha
         uses: actions/github-script@v4
@@ -35,7 +34,7 @@ jobs:
             });
             return pr.data.head.sha;
 
-      - if: ${{ github.event.label.name=="e2e" }}
+      - if: ${{ contains(github.event.pull_request.labels.*.name, 'e2e') }}
         uses: LouisBrunner/checks-action@v1.1.1
         id: check
         with:
