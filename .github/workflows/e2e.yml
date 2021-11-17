@@ -16,6 +16,7 @@ jobs:
         id: sha
         uses: actions/github-script@v4
         with:
+          result-encoding: string
           script: |
             const { owner, repo, number } = context.issue;
             github.reactions.createForIssueComment({
@@ -29,7 +30,7 @@ jobs:
               repo,
               pull_number: number
             });
-            return pr.data.head.sha
+            return pr.data.head.sha;
 
       - if: contains(github.event.comment.body, '/e2e')
         uses: LouisBrunner/checks-action@v1.1.1
