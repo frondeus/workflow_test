@@ -19,8 +19,9 @@ jobs:
       - name: Run tests
         id: test
         run: |
-          echo "Running tests ${{ GITHUB_REF }}"
+          echo "Running tests ${{ env.GITHUB_REF }}"
           sleep 6
+          exit 1
 
       - uses: LouisBrunner/checks-action@v1.1.1
         if: always()
