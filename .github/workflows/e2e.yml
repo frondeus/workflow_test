@@ -17,6 +17,16 @@ jobs:
           fetch-depth: 2
 
       - name: Run tests
+        id: test
         run: |
-          echo "Running tests ${{ env.GITHUB_BRANCH }}"
+          echo "Running tests ${{ GITHUB_REF }}"
           sleep 6
+
+      - uses: LouisBrunner/checks-action@v1.1.1
+        if: always()
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: E2E tests
+          conclusion: ${{ job.status }}
+          output: |
+            {"summary": ${{ steps.test.outputs.summary }}}
