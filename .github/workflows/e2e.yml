@@ -56,7 +56,7 @@ jobs:
           sleep 6
           exit 1
 
-      - if: ${{ github.event.label.name=="e2e" && always() }}
+      - if: ${{ contains(github.event.pull_request.labels.*.name, 'e2e') && always() }}
         uses: LouisBrunner/checks-action@v1.1.1
         with:
           token: ${{ steps.app_token.outputs.app_token }}
