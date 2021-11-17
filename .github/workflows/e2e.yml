@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
     if: ${{ github.event.push != null || (github.event.issue.pull_request && contains(github.event.comment.body, '/e2e')) }}
     steps:
-      - if: contains(github.event.commet.body, '/e2e')
+      - if: contains(github.event.comment.body, '/e2e')
         name: Get App token
         id: app_token
         uses: machine-learning-apps/actions-app-token@master
