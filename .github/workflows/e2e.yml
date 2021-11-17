@@ -9,8 +9,15 @@ jobs:
   build:
     name: Run tests
     runs-on: ubuntu-20.04
-    if: ${{ github.event.push != null || (contains(github.event.comment.html_url, '/pull/') && contains(github.event.comment.body, '/e2e')) }}
+    if: ${{ github.event.push != null || (github.event.issue.pull_request && contains(github.event.comment.body, '/e2e')) }}
     steps:
+      - if: contains(github.event.comment.body, '/e2e')
+        name: Check comment sha
+        id: comment-sha
+        run: |
+          echo "Head: ${{ github.event.issue.pull_request.head_sha }}"
+          echo "Sha: ${{ env.GITHUB_SHA }}"
+
       - if: contains(github.event.comment.body, '/e2e')
         uses: LouisBrunner/checks-action@v1.1.1
         id: check
@@ -27,7 +34,7 @@ jobs:
       - name: Run tests
         id: test
         run: |
-          echo "Running tests ${{ env.GITHUB_REF }}"
+          echo "Running tests ${{ env.GITHUB_SHA }}"
           sleep 6
           exit 1
 
