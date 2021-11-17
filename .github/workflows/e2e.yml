@@ -11,6 +11,14 @@ jobs:
     runs-on: ubuntu-20.04
     if: ${{ github.event.push != null || (contains(github.event.comment.html_url, '/pull/') && contains(github.event.comment.body, '/e2e')) }}
     steps:
+      - if: contains(github.event.comment.body, '/e2e')
+        uses: LouisBrunner/checks-action@v1.1.1
+        id: check
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: E2E tests
+          status: in_progress
+
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -23,11 +31,11 @@ jobs:
           sleep 6
           exit 1
 
-      - uses: LouisBrunner/checks-action@v1.1.1
-        if: always()
+      - if: contains(github.event.comment.body, '/e2e') && always()
+        uses: LouisBrunner/checks-action@v1.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: E2E tests
+          check_id: ${{ steps.check.outputs.check_id }}
           conclusion: ${{ job.status }}
           output: |
-            {"summary": ${{ steps.test.outputs.summary }}}
+            {"summary":${{ steps.test.outputs.summary }}}
