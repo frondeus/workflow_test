@@ -1,42 +1,22 @@
-name: E2E Docker
+name: E2E Tests
 on:
-  workflow_run:
-    workflows: ["Docker base image"]
-    branches: [ master ]
-    types: [ completed ]
   issue_comment:
     types: [created, edited]
   push:
     branches: [ master ]
-    paths:
-      - 'README2.md'
   workflow_dispatch:
 jobs:
   build:
-    name: Build Image
+    name: Run tests
     runs-on: ubuntu-20.04
-    if: ${{ github.event.push !== undefined || github.event.workflow_run.conclusion == 'success' || (contains(github.event.comment.html_url, '/pull/') && contains(github.event.comment.body, '/e2e')) }}
+    if: ${{ github.event.push !== undefined || (contains(github.event.comment.html_url, '/pull/') && contains(github.event.comment.body, '/e2e')) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
 
-      - name: Check if README.md has been changed as well
-        id: getfile
+      - name: Run tests
         run: |
-          echo "::set-output name=files::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | egrep 'README.md|')"
-
-      - name: Debug variables
-        run: |
-          echo "Files: ${{ steps.getfile.outputs.files }}"
-          echo "Workflow run: ${{ github.event.workflow_run }}"
-
-      - name: Cancel workflow if README.md changed
-        if: ${{ github.event.workflow_run == null && steps.getfile.outputs.files != '' }}
-        uses: andymckay/cancel-action@0.2
-
-      - name: Build me!
-        run: |
-          echo "Docker build"
+          echo "Running tests ${{ env.GITHUB_BRANCH }}"
           sleep 6
