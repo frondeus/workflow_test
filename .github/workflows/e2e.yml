@@ -16,9 +16,19 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: artifact.yml
+          workflow_conclusion: success
+          branch: "${{ env.GITHUB_REF }}"
+          commit: "${{ env.GITHUB_SHA }}"
+          name: foo
+
       - name: Run tests
         id: test
         run: |
-          echo "Running tests ${{ env.GITHUB_SHA }}"
+          echo "Running tests ${{ env.GITHUB_REF }}"
           sleep 6
+          cat my_artifact.txt
           exit 1

@@ -1,0 +1,33 @@
+name: Artifact
+on:
+  pull_request:
+    branches: [ master ]
+    types: [ labeled, opened, synchronize, reopened ]
+  push:
+    branches: [ master ]
+jobs:
+  build:
+    name: Build artifacts
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - run: echo GITHUB_BRANCH="${GITHUB_REF##refs/heads/}" >> $GITHUB_ENV
+
+      - name: Tar Artifact
+        if: ${{ env.GITHUB_BRANCH == 'next' || contains(github.event.pull_request.labels.*.name, 'e2e') }}
+        run: |
+          echo "Running tests ${{ env.GITHUB_BRANCH }}"
+          sleep 6
+          echo "MyArtifact ${{ github.event.pull_request.head.sha }}" >> my_artifact.txt
+          cat my_artifact.txt
+
+      - name: Upload artifact
+        if: ${{ env.GITHUB_BRANCH == 'next' || contains(github.event.pull_request.labels.*.name, 'e2e') }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: foo
+          path: my_artifact.txt
