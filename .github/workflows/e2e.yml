@@ -46,7 +46,7 @@ jobs:
             );
             console.log(labels);
 
-            return labels.join(",");
+            return labels.flat().join(",");
 
 
       - run: echo "${{ steps.labels.output.result }}"
