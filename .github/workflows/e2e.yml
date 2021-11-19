@@ -49,6 +49,7 @@ jobs:
                     owner, repo,
                     head_sha: pr.data.head.sha,
                     name: "E2E Tests",
+                    details_url: "https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}",
                     status: "in_progress"
                   });
 
@@ -102,6 +103,9 @@ jobs:
                 owner, repo,
                 check_run_id,
                 status: "completed",
-                conclusion: "${{ job.status }}"
+                conclusion: "${{ job.status }}",
+                output: {
+                  summary: "E2E Tests failed, see link below to get logs why"
+                }
               });
             }
