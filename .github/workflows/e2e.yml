@@ -22,29 +22,31 @@ jobs:
       # - run: echo "${{toJSON(github.event.workflow_run.pull_requests)}}"
 
       - uses: actions/github-script@v5
+        id: labels
         with:
           result-encoding: string
           script: |
             const { owner, repo } = context.repo;
 
-            for(let pull_number of context.payload.workflow_run.pull_requests.map(pr => pr.number)) {
-              let pr = await github.rest.pulls.get({
-                owner, repo,
-                pull_number
-              });
+            const labels = await Promise.all(
+              context.payload.workflow_run.pull_requests.map(pr => pr.number)
+              .map(async (pull_number) => {
+                let pr = await github.rest.pulls.get({
+                  owner, repo,
+                  pull_number
+                });
 
-              console.log(pr);
-            }
-      # - name: Wait for artifact
-      #   if: ${{ env.GITHUB_BRANCH != 'next' && env.GITHUB_BRANCH != 'master' }}
-      #   uses: fountainhead/action-wait-for-check@v1.0.0
-      #   with:
-      #     ref: ${{ github.event.pull_request.head.sha }}
-      #     checkName: 'Build artifacts'
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     timeoutSeconds: 1200
+                return pr.data.labels;
+              })
+            );
+
+            return labels.join(",");
+
+
+      - run: echo IS_E2E="${{ contains(steps.labels.output.result, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Download artifact
+        if: ${{ env.IS_E2E }}
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: artifact.yml
@@ -54,9 +56,18 @@ jobs:
           name: foo
 
       - name: Run tests
-        id: test
+        if: ${{ env.IS_E2E }}
         run: |
           echo "Running tests ${{ env.GITHUB_REF }}"
           sleep 6
           cat my_artifact.txt
           exit 1
+
+      # - name: Wait for artifact
+      #   if: ${{ env.GITHUB_BRANCH != 'next' && env.GITHUB_BRANCH != 'master' }}
+      #   uses: fountainhead/action-wait-for-check@v1.0.0
+      #   with:
+      #     ref: ${{ github.event.pull_request.head.sha }}
+      #     checkName: 'Build artifacts'
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     timeoutSeconds: 1200
