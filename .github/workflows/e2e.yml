@@ -45,8 +45,8 @@ jobs:
             return labels.join(",");
 
 
-      - run: echo "${{ steps.prs.outputs.result }}"
-      - run: echo IS_E2E="${{ contains(steps.prs.outputs.result, 'e2e') }}" >> $GITHUB_ENV
+      - run: echo "${{ steps.labels.outputs.result }}"
+      - run: echo IS_E2E="${{ contains(steps.labels.outputs.result, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Create check
         id: check
