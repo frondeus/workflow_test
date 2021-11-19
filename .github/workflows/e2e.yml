@@ -32,7 +32,7 @@ jobs:
               return "";
             }
 
-            const labels = await Promise.all(
+            let labels = await Promise.all(
               context.payload.workflow_run.pull_requests.map(pr => pr.number)
               .flatMap(async (pull_number) => {
                 let pr = await github.rest.pulls.get({
@@ -43,7 +43,8 @@ jobs:
                 console.log(pr.data.labels);
                 return pr.data.labels.map(label => label.name);
               })
-            ).flat();
+            );
+            labels = labels.flat();
             console.log("Labels:", labels);
             const joined = labels.join(",");
             return joined;
