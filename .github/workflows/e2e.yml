@@ -22,7 +22,7 @@ jobs:
       # - run: echo "${{toJSON(github.event.workflow_run.pull_requests)}}"
 
       - uses: actions/github-script@v5
-        id: labels
+        id: prs
         with:
           result-encoding: string
           script: |
@@ -32,7 +32,7 @@ jobs:
               return "";
             }
 
-            let labels = await Promise.all(
+            let data = await Promise.all(
               context.payload.workflow_run.pull_requests.map(pr => pr.number)
               .map(async (pull_number) => {
                 let pr = await github.rest.pulls.get({
@@ -40,25 +40,30 @@ jobs:
                   pull_number
                 });
 
-                console.log(pr.data.labels);
-                return pr.data.labels.map(label => label.name);
+                let sha = pr.data.head.sha;
+
+                return {
+                  sha,
+                  labels: pr.data.labels.map(label => label.name)
+                };
               })
             );
-            labels = labels.flat();
-            console.log("Labels:", labels);
-            const joined = labels.join(",");
-            console.log("Joined", joined);
-            return joined;
+            let labels = data.map(d => d.labels).flat();
+            let sha = data.map(d => d.sha).shift();
+
+            return { labels, sha };
 
 
-      - run: echo "${{ steps.labels.outputs.result }}"
+      - run: echo "${{ steps.prs.outputs.result }}"
 
-      - run: echo IS_E2E="${{ contains(steps.labels.outputs.result, 'e2e') }}" >> $GITHUB_ENV
+      - run: echo IS_E2E="${{ contains(steps.prs.outputs.result.labels, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Create check
         id: check
         uses: LouisBrunner/checks-action@v1.1.1
+        if: ${{ env.IS_E2E == 'true' }}
         with:
+          sha: ${{ steps.prs.outputs.result.sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
           name: "E2E Tests"
           status: in_progress
