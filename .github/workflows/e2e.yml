@@ -1,24 +1,48 @@
 name: E2E Tests
 on:
-  pull_request:
-    branches: [ master ]
-    types: [ labeled, opened, synchronize, reopened ]
   push:
-    branches: [ master ]
+    branches: [ next, master ]
+  workflow_run:
+    workflows: ["Artifact"]
+    types:
+      - completed
 jobs:
   build:
     name: Run tests
     runs-on: ubuntu-20.04
-    if: ${{ github.event.push != null || contains(github.event.pull_request.labels.*.name, 'e2e') }}
+    # if: ${{ github.event.push != null || contains(github.event.pull_request.labels.*.name, 'e2e') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
 
+      - run: echo GITHUB_BRANCH="${GITHUB_REF##refs/heads/}" >> $GITHUB_ENV
+
+      - run: echo "${{github.event.workflow_run}}"
+
+      # - name: Wait for artifact
+      #   if: ${{ env.GITHUB_BRANCH != 'next' && env.GITHUB_BRANCH != 'master' }}
+      #   uses: fountainhead/action-wait-for-check@v1.0.0
+      #   with:
+      #     ref: ${{ github.event.pull_request.head.sha }}
+      #     checkName: 'Build artifacts'
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     timeoutSeconds: 1200
+
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: artifact.yml
+          workflow_conclusion: success
+          branch: "${{ env.GITHUB_REF }}"
+          commit: "${{ env.GITHUB_SHA }}"
+          name: foo
+
       - name: Run tests
         id: test
         run: |
-          echo "Running tests ${{ env.GITHUB_SHA }}"
+          echo "Running tests ${{ env.GITHUB_REF }}"
           sleep 6
+          cat my_artifact.txt
           exit 1
