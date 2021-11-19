@@ -17,9 +17,8 @@ jobs:
       - run: echo GITHUB_BRANCH="${GITHUB_REF##refs/heads/}" >> $GITHUB_ENV
 
       - uses: actions/github-script@v5
-        id: labels
+        id: prs
         with:
-          result-encoding: string
           script: |
             const { owner, repo } = context.repo;
 
@@ -35,7 +34,20 @@ jobs:
                   pull_number
                 });
 
-                return pr.data.labels.map(label => label.name);
+                let labels = pr.data.labels.map(label => label.name);
+                if(labels.includes('e2e')) {
+                  const check = await github.rest.checks.create({
+                    owner, repo
+                    head_sha: pr.head.sha,
+                    name: "E2E Tests",
+                    status: "in_progress"
+                  });
+
+                  const check_id = check.data.id;
+                  return { labels, check_id };
+                }
+
+                return { labels };
               })
             );
 
@@ -44,19 +56,7 @@ jobs:
 
             return labels.join(",");
 
-
-      - run: echo "${{ steps.labels.outputs.result }}"
-      - run: echo IS_E2E="${{ contains(steps.labels.outputs.result, 'e2e') }}" >> $GITHUB_ENV
-
-      - name: Create check
-        id: check
-        uses: LouisBrunner/checks-action@v1.1.1
-        if: ${{ env.IS_E2E == 'true' }}
-        with:
-          sha: ${{ github.event.workflow_run.head_sha }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          name: "E2E Tests"
-          status: in_progress
+      - run: echo IS_E2E="${{ contains(fromJSON(steps.prs.outputs.result).labels, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Download artifact
         if: ${{ env.IS_E2E == 'true' }}
@@ -78,9 +78,14 @@ jobs:
 
       - name: Complete check
         if: ${{ env.IS_E2E == 'true' && always() }}
-        uses: LouisBrunner/checks-action@v1.1.1
+        uses: actions/github-script@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          check_id: ${{ steps.check.outputs.check_id }}
-          status: completed
-          conclusion: ${{ job.status }}
+          script: |
+            const { owner, repo } = context.repo;
+
+            await github.rest.checks.update({
+               owner, repo,
+               check_run_id: ${{ fromJSON(steps.prs.outputs.result).check_id }},
+               status: "completed",
+               conclusion: "${{ job.status }}"
+            });
