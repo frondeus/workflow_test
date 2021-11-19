@@ -34,7 +34,7 @@ jobs:
 
             let labels = await Promise.all(
               context.payload.workflow_run.pull_requests.map(pr => pr.number)
-              .flatMap(async (pull_number) => {
+              .map(async (pull_number) => {
                 let pr = await github.rest.pulls.get({
                   owner, repo,
                   pull_number
@@ -47,12 +47,13 @@ jobs:
             labels = labels.flat();
             console.log("Labels:", labels);
             const joined = labels.join(",");
+            console.log("Joined", joined);
             return joined;
 
 
-      - run: echo "${{ steps.labels.output.result }}"
+      - run: echo "${{ steps.labels.outputs.result }}"
 
-      - run: echo IS_E2E="${{ contains(steps.labels.output.result, 'e2e') }}" >> $GITHUB_ENV
+      - run: echo IS_E2E="${{ contains(steps.labels.outputs.result, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Download artifact
         if: ${{ env.IS_E2E == 'true' }}
