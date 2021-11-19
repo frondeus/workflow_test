@@ -43,6 +43,8 @@ jobs:
             return labels.join(",");
 
 
+      - run: echo "${{ steps.labels.output.result }}"
+
       - run: echo IS_E2E="${{ contains(steps.labels.output.result, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Download artifact
