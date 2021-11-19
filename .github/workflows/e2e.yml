@@ -44,7 +44,7 @@ jobs:
                 return pr.data.labels.map(label => label.name);
               })
             ).flat();
-            console.log("Labels:, labels);
+            console.log("Labels:", labels);
             const joined = labels.join(",");
             return joined;
 
