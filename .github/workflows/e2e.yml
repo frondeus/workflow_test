@@ -39,7 +39,7 @@ jobs:
                 if(labels.includes('e2e')) {
                   const check = await github.rest.checks.create({
                     owner, repo,
-                    head_sha: pr.head.sha,
+                    head_sha: pr.data.head.sha,
                     name: "E2E Tests",
                     status: "in_progress"
                   });
