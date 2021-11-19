@@ -24,7 +24,7 @@ jobs:
       - uses: actions/github-script@v5
         id: labels
         with:
-          result-encoding: string
+          # result-encoding: string
           script: |
             const { owner, repo } = context.repo;
 
