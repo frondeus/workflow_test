@@ -56,16 +56,16 @@ jobs:
 
       - run: echo "${{ steps.prs.outputs.result }}"
 
-      - run: echo "${{ steps.prs.outputs.result.labels }}"
+      - run: echo "${{ fromJSON(steps.prs.outputs.result).labels }}"
 
-      - run: echo IS_E2E="${{ contains(steps.prs.outputs.result.labels, 'e2e') }}" >> $GITHUB_ENV
+      - run: echo IS_E2E="${{ contains(fromJSON(steps.prs.outputs.result).labels, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Create check
         id: check
         uses: LouisBrunner/checks-action@v1.1.1
         if: ${{ env.IS_E2E == 'true' }}
         with:
-          sha: ${{ steps.prs.outputs.result.sha }}
+          sha: ${{ fromJSON(steps.prs.outputs.result).sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
           name: "E2E Tests"
           status: in_progress
