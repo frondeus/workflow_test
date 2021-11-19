@@ -35,9 +35,10 @@ jobs:
                 });
 
                 let labels = pr.data.labels.map(label => label.name);
+
                 if(labels.includes('e2e')) {
                   const check = await github.rest.checks.create({
-                    owner, repo
+                    owner, repo,
                     head_sha: pr.head.sha,
                     name: "E2E Tests",
                     status: "in_progress"
