@@ -16,9 +16,17 @@ jobs:
 
       - run: echo GITHUB_BRANCH="${GITHUB_REF##refs/heads/}" >> $GITHUB_ENV
 
+      - name: Get App token
+        id: app_token
+        uses: machine-learning-apps/actions-app-token@master
+        with:
+          APP_PEM: ${{ secrets.FRONDEUS_GH_PEM }}
+          APP_ID: ${{ secrets.FRONDEUS_GH_ID }}
+
       - uses: actions/github-script@v5
         id: prs
         with:
+          github-token: ${{ steps.app_token.outputs.app_token }}
           script: |
             const { owner, repo } = context.repo;
 
@@ -83,6 +91,7 @@ jobs:
         if: ${{ env.IS_E2E == 'true' && always() }}
         uses: actions/github-script@v5
         with:
+          github-token: ${{ steps.app_token.outputs.app_token }}
           script: |
             const { owner, repo } = context.repo;
 
