@@ -27,7 +27,7 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
 
-            for(let pull_number of github.event.workflow_run.pull_requests.map(pr => pr.number)) {
+            for(let pull_number of context.payload.workflow_run.pull_requests.map(pr => pr.number)) {
               let pr = await github.rest.pulls.get({
                 owner, repo,
                 pull_number
