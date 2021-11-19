@@ -28,6 +28,10 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
 
+            if(!context.payload.workflow_run) {
+              return "";
+            }
+
             const labels = await Promise.all(
               context.payload.workflow_run.pull_requests.flatMap(pr => pr.number)
               .map(async (pull_number) => {
@@ -36,7 +40,7 @@ jobs:
                   pull_number
                 });
 
-                console.log(pr.data);
+                console.log(pr.data.labels);
                 return pr.data.labels.map(label => label.name);
               })
             );
