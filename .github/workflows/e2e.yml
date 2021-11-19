@@ -36,9 +36,11 @@ jobs:
                   pull_number
                 });
 
+                console.log(pr.data);
                 return pr.data.labels;
               })
             );
+            console.log(labels);
 
             return labels.join(",");
 
