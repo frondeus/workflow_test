@@ -56,6 +56,8 @@ jobs:
 
       - run: echo "${{ steps.prs.outputs.result }}"
 
+      - run: echo "${{ steps.prs.outputs.result.labels }}"
+
       - run: echo IS_E2E="${{ contains(steps.prs.outputs.result.labels, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Create check
