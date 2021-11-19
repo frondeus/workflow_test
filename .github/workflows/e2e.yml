@@ -105,7 +105,8 @@ jobs:
                 status: "completed",
                 conclusion: "${{ job.status }}",
                 output: {
-                  summary: "E2E Tests failed, see link below to get logs why"
+                  title: "E2E Tests failed",
+                  summary: "See link below to get logs why"
                 }
               });
             }
