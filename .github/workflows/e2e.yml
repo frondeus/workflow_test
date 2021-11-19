@@ -43,10 +43,10 @@ jobs:
                 console.log(pr.data.labels);
                 return pr.data.labels.map(label => label.name);
               })
-            );
-            console.log(labels);
-
-            return labels.flat().join(",");
+            ).flat();
+            console.log("Labels:, labels);
+            const joined = labels.join(",");
+            return joined;
 
 
       - run: echo "${{ steps.labels.output.result }}"
