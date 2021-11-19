@@ -19,8 +19,22 @@ jobs:
 
       - run: echo GITHUB_BRANCH="${GITHUB_REF##refs/heads/}" >> $GITHUB_ENV
 
-      - run: echo "${{toJSON(github.event.workflow_run)}}"
+      # - run: echo "${{toJSON(github.event.workflow_run.pull_requests)}}"
 
+      - uses: actions/github-script@v5
+        with:
+          result-encoding: string
+          script: |
+            const { owner, repo } = context.repo;
+
+            for(let pull_number of github.event.workflow_run.pull_requests.map(pr => pr.number)) {
+              let pr = await github.rest.pulls.get({
+                owner, repo,
+                pull_number
+              });
+
+              console.log(pr);
+            }
       # - name: Wait for artifact
       #   if: ${{ env.GITHUB_BRANCH != 'next' && env.GITHUB_BRANCH != 'master' }}
       #   uses: fountainhead/action-wait-for-check@v1.0.0
