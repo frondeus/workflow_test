@@ -1,7 +1,5 @@
 name: E2E Tests
 on:
-  push:
-    branches: [ next, master ]
   workflow_run:
     workflows: ["Artifact"]
     types:
@@ -10,7 +8,6 @@ jobs:
   build:
     name: Run tests
     runs-on: ubuntu-20.04
-    # if: ${{ github.event.push != null || contains(github.event.pull_request.labels.*.name, 'e2e') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -19,12 +16,10 @@ jobs:
 
       - run: echo GITHUB_BRANCH="${GITHUB_REF##refs/heads/}" >> $GITHUB_ENV
 
-      # - run: echo "${{toJSON(github.event.workflow_run.pull_requests)}}"
-
       - uses: actions/github-script@v5
-        id: prs
+        id: labels
         with:
-          # result-encoding: string
+          result-encoding: string
           script: |
             const { owner, repo } = context.repo;
 
@@ -32,7 +27,7 @@ jobs:
               return "";
             }
 
-            let data = await Promise.all(
+            const labels = await Promise.all(
               context.payload.workflow_run.pull_requests.map(pr => pr.number)
               .map(async (pull_number) => {
                 let pr = await github.rest.pulls.get({
@@ -40,32 +35,21 @@ jobs:
                   pull_number
                 });
 
-                let sha = pr.data.head.sha;
-
-                return {
-                  sha,
-                  labels: pr.data.labels.map(label => label.name)
-                };
+                return pr.data.labels.map(label => label.name);
               })
             );
-            let labels = data.map(d => d.labels).flat();
-            let sha = data.map(d => d.sha).shift();
 
-            return { labels, sha };
+            return labels.flat().join(",");
 
 
-      - run: echo "${{ steps.prs.outputs.result }}"
-
-      - run: echo "${{ fromJSON(steps.prs.outputs.result).labels }}"
-
-      - run: echo IS_E2E="${{ contains(fromJSON(steps.prs.outputs.result).labels, 'e2e') }}" >> $GITHUB_ENV
+      - run: echo IS_E2E="${{ contains(steps.prs.outputs.result, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Create check
         id: check
         uses: LouisBrunner/checks-action@v1.1.1
         if: ${{ env.IS_E2E == 'true' }}
         with:
-          sha: ${{ fromJSON(steps.prs.outputs.result).sha }}
+          sha: ${{ github.event.workflow_run.head_sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
           name: "E2E Tests"
           status: in_progress
@@ -96,12 +80,3 @@ jobs:
           check_id: ${{ steps.check.outputs.check_id }}
           status: completed
           conclusion: ${{ job.status }}
-
-      # - name: Wait for artifact
-      #   if: ${{ env.GITHUB_BRANCH != 'next' && env.GITHUB_BRANCH != 'master' }}
-      #   uses: fountainhead/action-wait-for-check@v1.0.0
-      #   with:
-      #     ref: ${{ github.event.pull_request.head.sha }}
-      #     checkName: 'Build artifacts'
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     timeoutSeconds: 1200
