@@ -27,7 +27,7 @@ jobs:
               return "";
             }
 
-            const labels = await Promise.all(
+            let labels = await Promise.all(
               context.payload.workflow_run.pull_requests.map(pr => pr.number)
               .map(async (pull_number) => {
                 let pr = await github.rest.pulls.get({
@@ -39,7 +39,10 @@ jobs:
               })
             );
 
-            return labels.flat().join(",");
+            labels = labels.flat();
+            console.log('Labels:', labels);
+
+            return labels.join(",");
 
 
       - run: echo IS_E2E="${{ contains(steps.prs.outputs.result, 'e2e') }}" >> $GITHUB_ENV
