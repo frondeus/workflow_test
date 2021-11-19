@@ -86,7 +86,7 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
 
-            const check_ids = JSON.parse(${{ steps.prs.outputs.result}}).check_ids;
+            const check_ids = ${{ steps.prs.outputs.result }}.check_ids;
 
             for(let check_run_id of check_ids) {
               await github.rest.checks.update({
