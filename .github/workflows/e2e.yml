@@ -24,7 +24,7 @@ jobs:
       - uses: actions/github-script@v5
         id: labels
         with:
-          # result-encoding: string
+          result-encoding: string
           script: |
             const { owner, repo } = context.repo;
 
@@ -55,6 +55,14 @@ jobs:
 
       - run: echo IS_E2E="${{ contains(steps.labels.outputs.result, 'e2e') }}" >> $GITHUB_ENV
 
+      - name: Create check
+        id: check
+        uses: LouisBrunner/checks-action@v1.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: "E2E Tests"
+          status: in_progress
+
       - name: Download artifact
         if: ${{ env.IS_E2E == 'true' }}
         uses: dawidd6/action-download-artifact@v2
@@ -72,6 +80,15 @@ jobs:
           sleep 6
           cat my_artifact.txt
           exit 1
+
+      - name: Complete check
+        if: ${{ env.IS_E2E == 'true' && always() }}
+        uses: LouisBrunner/checks-action@v1.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          check_id: ${{ steps.check.outputs.check_id }}
+          status: completed
+          conclusion: ${{ job.status }}
 
       # - name: Wait for artifact
       #   if: ${{ env.GITHUB_BRANCH != 'next' && env.GITHUB_BRANCH != 'master' }}
