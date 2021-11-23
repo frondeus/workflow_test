@@ -43,6 +43,7 @@ jobs:
                 });
 
                 let labels = pr.data.labels.map(label => label.name);
+                console.log(pr.data);
 
                 if(labels.includes('e2e')) {
                   const check = await github.rest.checks.create({
@@ -69,6 +70,8 @@ jobs:
             };
 
       - run: echo IS_E2E="${{ contains(fromJSON(steps.prs.outputs.result).labels, 'e2e') }}" >> $GITHUB_ENV
+
+      - run: echo "${{ env.GITHUB_REF }}"
 
       - name: Download artifact
         if: ${{ env.IS_E2E == 'true' }}
