@@ -14,8 +14,6 @@ jobs:
         with:
           fetch-depth: 2
 
-      - run: echo GITHUB_BRANCH="${GITHUB_REF##refs/heads/}" >> $GITHUB_ENV
-
       - name: Get App token
         id: app_token
         uses: machine-learning-apps/actions-app-token@master
@@ -43,7 +41,7 @@ jobs:
                 });
 
                 let labels = pr.data.labels.map(label => label.name);
-                console.log(pr.data);
+                console.log(pr.data.head.sha);
 
                 if(labels.includes('e2e')) {
                   const check = await github.rest.checks.create({
@@ -55,23 +53,25 @@ jobs:
                   });
 
                   const check_id = check.data.id;
-                  return { labels, check_id };
+                  return { labels, check_id, branch: pr.data.head.ref };
                 }
 
-                return { labels };
+                return { labels: [] };
               })
             );
 
             const labels = data.map(d => d.labels).flat().join(",");
             const check_ids = data.map(d => d.check_id).filter(c => !!c);
+            const branch = data.map(d => d.branch).filter(c => !!c).shift();
 
             return {
-              labels, check_ids
+              labels, check_ids, branch
             };
 
       - run: echo IS_E2E="${{ contains(fromJSON(steps.prs.outputs.result).labels, 'e2e') }}" >> $GITHUB_ENV
+      - run: echo GITHUB_BRANCH="${{ fromJSON(steps.prs.outputs.result).branch }}" >> $GITHUB_ENV
 
-      - run: echo "${{ env.GITHUB_REF }}"
+      - run: echo "${GITHUB_branch}"
 
       - name: Download artifact
         if: ${{ env.IS_E2E == 'true' }}
@@ -79,7 +79,7 @@ jobs:
         with:
           workflow: artifact.yml
           workflow_conclusion: success
-          branch: "${{ env.GITHUB_REF }}"
+          branch: "${{ env.GITHUB_BRANCH }}"
           commit: "${{ env.GITHUB_SHA }}"
           name: foo
 
