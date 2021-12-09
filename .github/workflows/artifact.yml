@@ -13,7 +13,7 @@ jobs:
 
       - run: echo GITHUB_BRANCH="${GITHUB_REF##refs/heads/}" >> $GITHUB_ENV
 
-      - run: Get labels
+      - name: Get labels
         uses: actions/github-script@v5
         with:
           script: |
