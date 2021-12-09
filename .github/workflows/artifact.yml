@@ -17,6 +17,7 @@ jobs:
 
       - name: Get labels
         uses: actions/github-script@v5
+        id: labels
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -32,7 +33,7 @@ jobs:
             console.log(labels);
             return labels;
 
-      - run: echo IS_E2E="${{ contains(steps.prs.outputs.result, 'e2e') }}" >> $GITHUB_ENV
+      - run: echo IS_E2E="${{ contains(steps.labels.outputs.result, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Tar Artifact
         if: ${{ env.GITHUB_BRANCH == 'next' || env.IS_E2E == 'true' }}
