@@ -19,6 +19,8 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
 
+            console.log(context);
+
             const q = 'is:pr SHA:${{ env.GITHUB_SHA }}';
 
             console.log(q);
@@ -27,7 +29,7 @@ jobs:
               q
             });
 
-            console.log(result);
+            console.log(result.data.items);
 
       - name: Tar Artifact
         if: ${{ env.GITHUB_BRANCH == 'next' || contains(github.event.pull_request.labels.*.name, 'e2e') }}
