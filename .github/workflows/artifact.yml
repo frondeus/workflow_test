@@ -27,13 +27,15 @@ jobs:
 
             console.log(result.data.items);
 
-            const labels = result.data.items.flatMap(e => e.labels);
+            const labels = result.data.items.flatMap(e => e.labels).map(label => label.name);
 
             console.log(labels);
             return labels;
 
+      - run: echo IS_E2E="${{ contains(steps.prs.outputs.result, 'e2e') }}" >> $GITHUB_ENV
+
       - name: Tar Artifact
-        if: ${{ env.GITHUB_BRANCH == 'next' || contains(github.event.pull_request.labels.*.name, 'e2e') }}
+        if: ${{ env.GITHUB_BRANCH == 'next' || env.IS_E2E == 'true' }}
         run: |
           echo "Running tests ${{ env.GITHUB_BRANCH }}"
           sleep 6
@@ -41,7 +43,7 @@ jobs:
           cat my_artifact.txt
 
       - name: Upload artifact
-        if: ${{ env.GITHUB_BRANCH == 'next' || contains(github.event.pull_request.labels.*.name, 'e2e') }}
+        if: ${{ env.GITHUB_BRANCH == 'next' || env.IS_E2E == 'true' }}
         uses: actions/upload-artifact@v2
         with:
           name: foo
