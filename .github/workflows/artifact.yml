@@ -19,15 +19,11 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
 
-            console.log(context);
-
-            const q = 'is:pr is:open SHA:' + context.payload.after;
-
+            const q = 'is:pr is:open SHA:' + context.sha;
             console.log(q);
+            const result = await github.rest.search.issuesAndPullRequests({q});
 
-            const result = await github.rest.search.issuesAndPullRequests({
-              q
-            });
+            console.log(result.data.items);
 
             const labels = result.data.items.flatMap(e => e.labels);
 
