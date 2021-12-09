@@ -71,7 +71,7 @@ jobs:
       - run: echo IS_E2E="${{ contains(fromJSON(steps.prs.outputs.result).labels, 'e2e') }}" >> $GITHUB_ENV
       - run: echo GITHUB_BRANCH="${{ fromJSON(steps.prs.outputs.result).branch }}" >> $GITHUB_ENV
 
-      - run: echo "${GITHUB_branch}"
+      - run: echo "${GITHUB_BRANCH}"
 
       - name: Download artifact
         if: ${{ env.IS_E2E == 'true' }}
