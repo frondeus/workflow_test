@@ -1,10 +1,6 @@
 name: Artifact
 on:
-  pull_request:
-    branches: [ master ]
-    types: [ labeled, opened, synchronize, reopened ]
   push:
-    branches: [ master ]
 jobs:
   build:
     name: Build artifacts
@@ -16,6 +12,22 @@ jobs:
           fetch-depth: 2
 
       - run: echo GITHUB_BRANCH="${GITHUB_REF##refs/heads/}" >> $GITHUB_ENV
+
+      - run: Get labels
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            const q = 'is:pr SHA:${{ env.GITHUB_SHA }}';
+
+            console.log(q);
+
+            const result = await github.rest.search.issuesAndPullRequests({
+              q
+            });
+
+            console.log(result);
 
       - name: Tar Artifact
         if: ${{ env.GITHUB_BRANCH == 'next' || contains(github.event.pull_request.labels.*.name, 'e2e') }}
