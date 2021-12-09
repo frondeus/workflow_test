@@ -21,7 +21,7 @@ jobs:
 
             console.log(context);
 
-            const q = 'is:pr SHA:${{ env.GITHUB_SHA }}';
+            const q = 'is:pr is:open SHA:' + context.payload.after;
 
             console.log(q);
 
@@ -29,7 +29,10 @@ jobs:
               q
             });
 
-            console.log(result.data.items);
+            const labels = result.data.items.flatMap(e => e.labels);
+
+            console.log(labels);
+            return labels;
 
       - name: Tar Artifact
         if: ${{ env.GITHUB_BRANCH == 'next' || contains(github.event.pull_request.labels.*.name, 'e2e') }}
