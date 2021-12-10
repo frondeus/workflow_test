@@ -53,7 +53,9 @@ jobs:
                   });
 
                   const check_id = check.data.id;
-                  return { labels, check_id, branch: pr.data.head.ref };
+                  const branch = pr.data.head.ref;
+                  const sha=pr.data.head.sha;
+                  return { labels, check_id, branch, sha };
                 }
 
                 return { labels: [] };
@@ -63,13 +65,21 @@ jobs:
             const labels = data.map(d => d.labels).flat().join(",");
             const check_ids = data.map(d => d.check_id).filter(c => !!c);
             const branch = data.map(d => d.branch).filter(c => !!c).shift();
+            const sha = data.map(d => d.sha).filter(c => !!c).shift();
 
             return {
-              labels, check_ids, branch
+              labels, check_ids, branch, sha
             };
 
       - run: echo IS_E2E="${{ contains(fromJSON(steps.prs.outputs.result).labels, 'e2e') }}" >> $GITHUB_ENV
       - run: echo GITHUB_BRANCH="${{ fromJSON(steps.prs.outputs.result).branch }}" >> $GITHUB_ENV
+      - run: echo GITHUB_SHA="${{ fromJSON(steps.prs.outputs.result).sha }}" >> $GITHUB_ENV
+
+      - name: Checkout the right branch
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ env.GITHUB_SHA }}"
+          git checkout "${{ env.GITHUB_SHA }}"
+          git status
 
       - run: echo "${GITHUB_BRANCH}"
 
