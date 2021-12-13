@@ -28,6 +28,8 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
 
+            console.log(context);
+
             if(!context.payload.workflow_run) {
               return "";
             }
