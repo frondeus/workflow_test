@@ -21,6 +21,10 @@ jobs:
         with:
           script: |
             console.log(context);
+            if (context.eventName === 'pull_request') {
+              const pr = context.payload.pull_request;
+              return pr.labels.map(label => label.name);
+            }
 
             const prs = await github.rest.search.issuesAndPullRequests({
               q: 'is:pr is:open SHA:' + context.sha
