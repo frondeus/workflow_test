@@ -18,6 +18,7 @@ module.exports = async ({ github, context }) => {
 
              if(labels.includes('e2e')) {
                console.log(context.payload.repository);
+               console.log(context);
 
                const check = await github.rest.checks.create({
                  owner, repo,
