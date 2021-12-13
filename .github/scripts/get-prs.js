@@ -42,8 +42,8 @@ module.exports = async ({ github, context }) => {
 
   const labels = data.map(d => d.labels).flat();
   const check_ids = data.map(d => d.check_id).filter(c => !!c);
-  const branch = data.map(d => d.branch).filter(c => !!c).shift() ?? context.ref;
-  const sha = data.map(d => d.sha).filter(c => !!c).shift() ?? context.sha;
+  const branch = data.map(d => d.branch).filter(c => !!c).shift() || context.ref;
+  const sha = data.map(d => d.sha).filter(c => !!c).shift() || context.sha;
 
   return {
     labels, check_ids, branch, sha
