@@ -29,6 +29,8 @@ jobs:
               .flatMap(e => e.labels)
               .map(label => label.name);
 
+      - run: echo "${{steps.labels.outputs.result}}"
+
       - run: echo IS_E2E="${{ contains(steps.labels.outputs.result, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Tar Artifact
