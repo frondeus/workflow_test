@@ -26,56 +26,8 @@ jobs:
         with:
           github-token: ${{ steps.app_token.outputs.app_token }}
           script: |
-            const { owner, repo } = context.repo;
-
-            console.log("Context", context);
-            console.log("Repository", context.repository);
-            console.log("Payload repository", context.payload.repository);
-            console.log("Context repo", context.repo);
-            console.log("Repo", repo);
-
-            if(!context.payload.workflow_run) {
-              return "";
-            }
-
-            let data = await Promise.all(
-              context.payload.workflow_run.pull_requests.map(pr => pr.number)
-              .map(async (pull_number) => {
-                let pr = await github.rest.pulls.get({
-                  owner, repo,
-                  pull_number
-                });
-
-                let labels = pr.data.labels.map(label => label.name);
-                console.log(pr.data.head.sha);
-
-                if(labels.includes('e2e')) {
-                  const check = await github.rest.checks.create({
-                    owner, repo,
-                    head_sha: pr.data.head.sha,
-                    name: "E2E Tests",
-                    details_url: "https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}",
-                    status: "in_progress"
-                  });
-
-                  const check_id = check.data.id;
-                  const branch = pr.data.head.ref;
-                  const sha=pr.data.head.sha;
-                  return { labels, check_id, branch, sha };
-                }
-
-                return { labels: [] };
-              })
-            );
-
-            const labels = data.map(d => d.labels).flat().join(",");
-            const check_ids = data.map(d => d.check_id).filter(c => !!c);
-            const branch = data.map(d => d.branch).filter(c => !!c).shift();
-            const sha = data.map(d => d.sha).filter(c => !!c).shift();
-
-            return {
-              labels, check_ids, branch, sha
-            };
+            const script = require('./.github/scripts/get-prs.js');
+            return await script({ github, context });
 
       - run: echo IS_E2E="${{ contains(fromJSON(steps.prs.outputs.result).labels, 'e2e') }}" >> $GITHUB_ENV
       - run: echo GITHUB_BRANCH="${{ fromJSON(steps.prs.outputs.result).branch }}" >> $GITHUB_ENV
@@ -113,19 +65,6 @@ jobs:
         with:
           github-token: ${{ steps.app_token.outputs.app_token }}
           script: |
-            const { owner, repo } = context.repo;
-
+            const script = require('./.github/scripts/complete-check.js');
             const check_ids = ${{ steps.prs.outputs.result }}.check_ids;
-
-            for(let check_run_id of check_ids) {
-              await github.rest.checks.update({
-                owner, repo,
-                check_run_id,
-                status: "completed",
-                conclusion: "${{ job.status }}",
-                output: {
-                  title: "E2E Tests failed",
-                  summary: "See link below to get logs why"
-                }
-              });
-            }
+            script({ github, context, check_ids, status: "${{ job.status }}" });
