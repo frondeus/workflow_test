@@ -28,7 +28,11 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
 
-            console.log(context);
+            console.log("Context", context);
+            console.log("Repository", context.repository);
+            console.log("Payload repository", context.payload.repository);
+            console.log("Context repo", context.repo);
+            console.log("Repo", repo);
 
             if(!context.payload.workflow_run) {
               return "";
