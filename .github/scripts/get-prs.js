@@ -17,6 +17,8 @@ module.exports = async ({ github, context }) => {
              let labels = pr.data.labels.map(label => label.name);
 
              if(labels.includes('e2e')) {
+               console.log(context.payload.repository);
+
                const check = await github.rest.checks.create({
                  owner, repo,
                  head_sha: pr.data.head.sha,
