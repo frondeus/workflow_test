@@ -20,25 +20,10 @@ jobs:
         id: labels
         with:
           script: |
-            console.log(context);
-            if (context.eventName === 'pull_request') {
-              const pr = context.payload.pull_request;
-              return pr.labels.map(label => label.name);
-            }
+            const script = require('./.github/scripts/get-labels.js');
+            return await script({ github, context });
 
-            const prs = await github.rest.search.issuesAndPullRequests({
-              q: 'is:pr is:open SHA:' + context.sha
-            });
-
-            console.log("PRs:", prs);
-
-            return prs
-            .data.items
-              .flatMap(e => e.labels)
-              .map(label => label.name);
-
-      - run: echo "${{steps.labels.outputs.result}}"
-
+      - run: echo "Debug labels: ${{steps.labels.outputs.result}}"
       - run: echo IS_E2E="${{ contains(steps.labels.outputs.result, 'e2e') }}" >> $GITHUB_ENV
 
       - name: Tar Artifact
