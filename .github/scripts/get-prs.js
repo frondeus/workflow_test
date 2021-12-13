@@ -23,7 +23,7 @@ module.exports = async ({ github, context }) => {
                  owner, repo,
                  head_sha: pr.data.head.sha,
                  name: "E2E Tests",
-                 details_url: `https://github.com/${ owner }/${ repo }/actions/runs/${ context.runId }?check_suite_focus=true`,
+                 details_url: `https://github.com/${ owner }/${ repo }/runs/${ context.runId }?check_suite_focus=true`,
                  status: "in_progress"
                });
 
