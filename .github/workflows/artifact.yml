@@ -23,7 +23,7 @@ jobs:
             const script = require('./.github/scripts/get-labels.js');
             return await script({ github, context });
 
-      - run: echo "Debug labels: ${{steps.labels.outputs.result}}"
+      # - run: echo "Debug labels: ${{steps.labels.outputs.result}}"
 
       - run: echo IS_E2E="${{ contains(steps.labels.outputs.result, 'e2e') }}" >> $GITHUB_ENV
 
