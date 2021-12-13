@@ -34,6 +34,7 @@ jobs:
       - run: echo GITHUB_SHA="${{ fromJSON(steps.prs.outputs.result).sha }}" >> $GITHUB_ENV
 
       - name: Checkout the right branch
+        if: ${{ env.IS_E2E == 'true' }}
         run: |
           git fetch --no-tags --depth=1 origin "${{ env.GITHUB_SHA }}"
           git checkout "${{ env.GITHUB_SHA }}"
